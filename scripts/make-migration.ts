@@ -39,7 +39,7 @@ Migration will be created in: migrations/ folder
 
   // Generate SQL template
   const sqlTemplate = `-- Migration: ${filename}
--- Description: ${migrationName.replace(/_/g, ' ')}
+-- Description: ${migrationName.replace(/_/g, ' ')} 
 -- Created: ${new Date().toISOString().split('T')[0]}
 
 -- Your SQL migration here
