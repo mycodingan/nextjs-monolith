@@ -16,4 +16,4 @@ CREATE TABLE IF NOT EXISTS users (
 INSERT INTO users (id, email, name, password, role) VALUES 
 ('user_1', 'admin@example.com', 'Admin User', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/HS.iK2O', 'ADMIN'),
 ('user_2', 'user@example.com', 'Regular User', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/HS.iK2O', 'USER')
-ON DUPLICATE KEY UPDATE name = VALUES(name); 
+ON DUPLICATE KEY UPDATE name = VALUES(name);  
