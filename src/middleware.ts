@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
 
 export function middleware(request: NextRequest) {
   // Paths yang memerlukan authentication
@@ -15,40 +14,42 @@ export function middleware(request: NextRequest) {
   const isProtectedPath = protectedPaths.some(protectedPath => 
     path.startsWith(protectedPath) && path !== '/api/auth/login'
   );
+  
+  console.log('🔍 Middleware debug:', {
+    path,
+    isProtectedPath,
+    protectedPaths,
+    isDevelopment: process.env.NODE_ENV === 'development'
+  });
 
   // Development mode - bypass token untuk testing
   const isDevelopment = process.env.NODE_ENV === 'development';
   const bypassToken = isDevelopment && request.nextUrl.searchParams.get('bypass') === 'true';
 
   if (isProtectedPath && !bypassToken) {
-    const token = request.headers.get('authorization')?.replace('Bearer ', '');
-
-    if (!token) {
+    console.log('🔐 Protected path detected, checking for Authorization header...');
+    
+    const authHeader = request.headers.get('authorization');
+    console.log('📨 Authorization header:', authHeader ? 'Present' : 'Missing');
+    
+    if (!authHeader) {
+      console.log('❌ No Authorization header found');
       return NextResponse.json(
         { error: 'Access token required' },
         { status: 401 }
       );
     }
 
-    try {
-      // Verifikasi token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
-      
-      // Tambahkan user info ke headers
-      const requestHeaders = new Headers(request.headers);
-      requestHeaders.set('user', JSON.stringify(decoded));
-
-      return NextResponse.next({
-        request: {
-          headers: requestHeaders,
-        },
-      });
-    } catch (error) {
+    // Just check if the header exists and has the right format
+    if (!authHeader.startsWith('Bearer ')) {
+      console.log('❌ Invalid Authorization header format');
       return NextResponse.json(
-        { error: 'Invalid token' },
+        { error: 'Invalid token format' },
         { status: 401 }
       );
     }
+
+    console.log('✅ Authorization header present and valid format');
   }
 
   return NextResponse.next();

@@ -1,16 +1,8 @@
 import mysql from 'mysql2/promise';
+import { appConfig } from './config';
 
-// Konfigurasi database seperti di Laravel
-const dbConfig = {
-  host: 'localhost',
-  user: 'root',
-  password: '', // default Laragon kosong
-  database: 'nearnnext_db',
-  port: 3306,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-};
+// Konfigurasi database dari config file
+const dbConfig = appConfig.database;
 
 // Buat connection pool
 export const db = mysql.createPool(dbConfig);

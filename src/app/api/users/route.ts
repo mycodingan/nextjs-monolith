@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/mysql';
 import bcrypt from 'bcryptjs';
-import { v4 as uuidv4 } from 'uuid';
 
 // GET /api/users - Get all users
 export async function GET() {
@@ -49,18 +48,17 @@ export async function POST(request: NextRequest) {
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
-    const userId = uuidv4();
 
-    // Buat user baru
+    // Buat user baru (tanpa mengisi id karena AUTO_INCREMENT)
     await query(
-      'INSERT INTO users (id, name, email, password, role) VALUES (?, ?, ?, ?, ?)',
-      [userId, name, email, hashedPassword, role]
+      'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
+      [name, email, hashedPassword, role]
     );
 
-    // Ambil user yang baru dibuat (tanpa password)
+    // Ambil user yang baru dibuat (tanpa password) berdasarkan email
     const newUser = await query(
-      'SELECT id, name, email, role, created_at, updated_at FROM users WHERE id = ?',
-      [userId]
+      'SELECT id, name, email, role, created_at, updated_at FROM users WHERE email = ?',
+      [email]
     );
 
     return NextResponse.json({ user: newUser[0] }, { status: 201 });

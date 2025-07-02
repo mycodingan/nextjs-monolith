@@ -1,6 +1,7 @@
 #!/usr/bin/env tsx
 
 import { MigrationManager } from '../src/lib/migration';
+import { query } from '../src/lib/mysql';
 
 async function main() {
   const command = process.argv[2];
@@ -22,7 +23,19 @@ async function main() {
       
       case 'fresh':
         console.log('🔄 Fresh migration (drop all tables and re-run)...');
-        // Note: Implement fresh migration if needed
+        
+        // Drop all tables in correct order (respecting foreign keys)
+        console.log('🗑️ Dropping all tables...');
+        await query('DROP TABLE IF EXISTS post_categories');
+        await query('DROP TABLE IF EXISTS comments');
+        await query('DROP TABLE IF EXISTS posts');
+        await query('DROP TABLE IF EXISTS categories');
+        await query('DROP TABLE IF EXISTS users');
+        
+        // Clear migrations table
+        await query('DELETE FROM migrations');
+        
+        console.log('✅ All tables dropped, starting fresh migration...\n');
         await migrationManager.migrate();
         break;
       

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/mysql';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
+import { appConfig } from '@/lib/config';
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,7 +21,7 @@ export async function POST(request: NextRequest) {
     const users = await query(
       'SELECT id, email, name, password, role FROM users WHERE email = ?',
       [email]
-    );
+    ) as any[];
 
     if (users.length === 0) {
       return NextResponse.json(
@@ -42,15 +43,23 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate JWT token
+    console.log('🔐 LOGIN DEBUG:');
+    console.log('JWT Secret from config:', appConfig.jwt.secret);
+    console.log('JWT Secret length:', appConfig.jwt.secret.length);
+    
+    const options: SignOptions = { expiresIn: appConfig.jwt.expiresIn as jwt.SignOptions['expiresIn'] };
     const token = jwt.sign(
       {
         userId: user.id,
         email: user.email,
         role: user.role,
       },
-      process.env.JWT_SECRET || 'your-secret-key',
-      { expiresIn: '7d' }
+      appConfig.jwt.secret,
+      options
     );
+    
+    console.log('Token generated:', token ? 'Yes' : 'No');
+    console.log('Token length:', token.length);
 
     // Return user data (tanpa password) dan token
     const { password: _, ...userWithoutPassword } = user;
